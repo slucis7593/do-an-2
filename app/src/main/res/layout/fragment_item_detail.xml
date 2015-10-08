@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="16dp"
+              android:gravity="center_horizontal"
+              android:orientation="vertical"
+              tools:context=".ItemDetailFragment">
+
+    <EditText
+        android:id="@+id/task_et_task_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textLongMessage"
+        android:hint="@string/task_name"/>
+
+    <EditText
+        android:id="@+id/task_et_task_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:hint="@string/task_detail"/>
+
+    <Button
+        android:id="@+id/task_btn_estimate_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:paddingLeft="32dp"
+        android:paddingRight="32dp"
+        android:textAllCaps="false"
+        android:text="@string/estimate_time"/>
+
+    <Button
+        android:id="@+id/task_btn_deadline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:paddingLeft="46dp"
+        android:paddingRight="46dp"
+        android:textAllCaps="false"
+        android:text="@string/deadline"/>
+
+</LinearLayout>

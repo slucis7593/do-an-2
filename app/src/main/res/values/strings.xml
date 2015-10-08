@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Phần mềm lập lịch</string>
+    <string name="title_item_detail">Công việc</string>
+    <string name="task_name">Tên công việc</string>
+    <string name="task_detail">Chi tiết công việc</string>
+    <string name="estimate_time">Thời gian hoàn thành</string>
+    <string name="deadline">Hạn chót</string>
+    <string name="save">Save</string>
+</resources>
