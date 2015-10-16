@@ -25,34 +25,21 @@ import java.util.List;
  */
 public class ItemListFragment extends ListFragment {
 
-    /**
-     * The serialization (saved instance state) Bundle key representing the
-     * activated item position. Only used on tablets.
-     */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-    /**
-     * A dummy implementation of the {@link Callbacks} interface that does
-     * nothing. Used only when this fragment is not attached to an activity.
-     */
+
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
         public void onItemSelected(Long id) {
+
         }
     };
-    /**
-     * The fragment's current callback object, which is notified of list item
-     * clicks.
-     */
+
     private Callbacks mCallbacks = sDummyCallbacks;
-    /**
-     * The current activated item position. Only used on tablets.
-     */
+
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
+    private TaskListAdapter mTaskListAdapter;
+
     public ItemListFragment() {
     }
 
@@ -60,8 +47,8 @@ public class ItemListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO: replace with a real list adapter.
-        setListAdapter(new TaskListAdapter(TaskContent.ITEMS));
+        mTaskListAdapter = new TaskListAdapter(TaskContent.ITEMS);
+        setListAdapter(mTaskListAdapter);
     }
 
     @Override
@@ -98,9 +85,6 @@ public class ItemListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-
-        // Notify the active callbacks interface (the activity, if the
-        // fragment is attached to one) that an item has been selected.
         mCallbacks.onItemSelected(TaskContent.ITEMS.get(position).id);
     }
 
@@ -135,15 +119,11 @@ public class ItemListFragment extends ListFragment {
         mActivatedPosition = position;
     }
 
-    /**
-     * A callback interface that all activities containing this fragment must
-     * implement. This mechanism allows activities to be notified of item
-     * selections.
-     */
+    public void updateUI() {
+        mTaskListAdapter.notifyDataSetChanged();
+    }
+
     public interface Callbacks {
-        /**
-         * Callback for when an item has been selected.
-         */
         public void onItemSelected(Long id);
     }
 

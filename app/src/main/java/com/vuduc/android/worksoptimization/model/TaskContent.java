@@ -1,5 +1,7 @@
 package com.vuduc.android.worksoptimization.model;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +15,9 @@ import java.util.UUID;
  */
 public class TaskContent {
 
-    /**
-     * An array of sample (dummy) items.
-     */
-    public static List<TaskItem> ITEMS = new ArrayList<TaskItem>();
+    private static final String TAG = TaskContent.class.getSimpleName();
+
+    public static ArrayList<TaskItem> ITEMS = new ArrayList<TaskItem>();
 
     /**
      * A map of sample (dummy) items, by ID.
@@ -25,16 +26,24 @@ public class TaskContent {
 
     private static final int COUNT = 25;
 
-    static {
-        // Add some sample items.
-        for (int i = 1; i <= COUNT; i++) {
-            addItem(createDummyItem(i));
-        }
-    }
-
-    private static void addItem(TaskItem item) {
+    public static void addItem(TaskItem item) {
         ITEMS.add(item);
         ITEM_MAP.put(item.id, item);
+    }
+
+    public static void deleteItem(long id) {
+       TaskItem deleteItem = null;
+        for (TaskItem item : ITEMS) {
+            if (item.id == id) {
+                deleteItem = item;
+                break;
+            }
+        }
+
+        if (deleteItem != null)
+            ITEMS.remove(deleteItem);
+
+        ITEM_MAP.remove(id);
     }
 
     private static TaskItem createDummyItem(long position) {
@@ -73,6 +82,12 @@ public class TaskContent {
             this.details = details;
             this.estimateTime = 0l;
             this.deadline = 0l;
+        }
+
+        public TaskItem(long id) {
+            this.id = id;
+            this.estimateTime = 0l;
+            this.deadline = System.currentTimeMillis();
         }
 
         @Override
