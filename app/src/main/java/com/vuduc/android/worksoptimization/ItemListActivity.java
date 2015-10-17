@@ -1,6 +1,9 @@
 package com.vuduc.android.worksoptimization;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.vuduc.android.worksoptimization.model.TaskContent;
+import com.vuduc.android.worksoptimization.model.TaskItem;
 
 public class ItemListActivity extends AppCompatActivity
         implements ItemListFragment.Callbacks {
@@ -30,7 +34,7 @@ public class ItemListActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 long id = System.currentTimeMillis();
-                TaskContent.addItem(new TaskContent.TaskItem(id));
+                TaskContent.addItem(new TaskItem(id));
                 onItemSelected(id);
             }
         });
@@ -39,7 +43,14 @@ public class ItemListActivity extends AppCompatActivity
         mDeleteFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDeleteFab.setActivated(true);
+                if (mDeleteFab.isActivated()) {
+                    mDeleteFab.setActivated(false);
+                    mDeleteFab.setImageResource(android.R.drawable.ic_delete);
+
+                } else {
+                    mDeleteFab.setActivated(true);
+                    mDeleteFab.setImageResource(android.R.drawable.ic_menu_delete);
+                }
             }
         });
 
@@ -60,7 +71,6 @@ public class ItemListActivity extends AppCompatActivity
             TaskContent.deleteItem(id);
             ((ItemListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.item_list)).updateUI();
-            mDeleteFab.setActivated(false);
         } else {
             if (mTwoPane) {
                 Bundle arguments = new Bundle();

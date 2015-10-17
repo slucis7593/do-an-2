@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.vuduc.android.worksoptimization.model.TaskContent;
+import com.vuduc.android.worksoptimization.model.TaskItem;
 import com.vuduc.android.worksoptimization.util.DateTimeUtils;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
@@ -44,7 +45,7 @@ public class ItemDetailFragment extends Fragment
     @Bind(R.id.task_et_task_name)
     TextView mEtTaskName;
 
-    private TaskContent.TaskItem mTaskItem;
+    private TaskItem mTaskItem;
 
     // Temporary data
     private Long mEstimateTime;

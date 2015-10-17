@@ -1,12 +1,8 @@
 package com.vuduc.android.worksoptimization.model;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Helper class for providing sample name for user interfaces created by
@@ -54,45 +50,4 @@ public class TaskContent {
         return "Details about Item: " + position;
     }
 
-    /**
-     * A dummy item representing a piece of name.
-     */
-    public static class TaskItem {
-        public Long id;
-        public String name;
-        public String details;
-        public Long estimateTime;
-        public Long deadline;
-
-        public TaskItem() {
-
-        }
-
-        public TaskItem(Long id, String name, String details, Long estimateTime, Long deadline) {
-            this.id = id;
-            this.name = name;
-            this.details = details;
-            this.estimateTime = estimateTime;
-            this.deadline = deadline;
-        }
-
-        public TaskItem(Long id, String content, String details) {
-            this.id = id;
-            this.name = content;
-            this.details = details;
-            this.estimateTime = 0l;
-            this.deadline = 0l;
-        }
-
-        public TaskItem(long id) {
-            this.id = id;
-            this.estimateTime = 0l;
-            this.deadline = System.currentTimeMillis();
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
 }

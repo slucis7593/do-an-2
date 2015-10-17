@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.vuduc.android.worksoptimization.model.TaskContent;
+import com.vuduc.android.worksoptimization.model.TaskItem;
 import com.vuduc.android.worksoptimization.util.DateTimeUtils;
 
 import java.util.List;
@@ -127,8 +128,8 @@ public class ItemListFragment extends ListFragment {
         public void onItemSelected(Long id);
     }
 
-    class TaskListAdapter extends ArrayAdapter<TaskContent.TaskItem> {
-        public TaskListAdapter(List<TaskContent.TaskItem> tasks) {
+    class TaskListAdapter extends ArrayAdapter<TaskItem> {
+        public TaskListAdapter(List<TaskItem> tasks) {
             super(getActivity(), 0, tasks);
         }
 
@@ -138,7 +139,7 @@ public class ItemListFragment extends ListFragment {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_task, null);
             }
 
-            TaskContent.TaskItem item = getItem(position);
+            TaskItem item = getItem(position);
 
             ((TextView) convertView.findViewById(R.id.list_item_tv_name)).setText(item.name);
             ((TextView) convertView.findViewById(R.id.list_item_tv_detail)).setText(item.details);
