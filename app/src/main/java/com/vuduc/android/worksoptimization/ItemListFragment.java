@@ -28,14 +28,14 @@ public class ItemListFragment extends ListFragment {
 
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
-    private static Callbacks sDummyCallbacks = new Callbacks() {
+    private static Callbacks sTaskCallbacks = new Callbacks() {
         @Override
         public void onItemSelected(Long id) {
 
         }
     };
 
-    private Callbacks mCallbacks = sDummyCallbacks;
+    private Callbacks mCallbacks = sTaskCallbacks;
 
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
@@ -80,7 +80,7 @@ public class ItemListFragment extends ListFragment {
         super.onDetach();
 
         // Reset the active callbacks interface to the dummy implementation.
-        mCallbacks = sDummyCallbacks;
+        mCallbacks = sTaskCallbacks;
     }
 
     @Override

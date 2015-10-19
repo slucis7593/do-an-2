@@ -40,4 +40,9 @@ public class TaskItem {
     public String toString() {
         return name;
     }
+
+    public double getRemainingTime() {
+        // TODO: return deadline - System.currentTimeMillis();
+        return deadline;
+    }
 }

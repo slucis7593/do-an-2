@@ -15,6 +15,7 @@ import com.vuduc.android.worksoptimization.model.TaskItem;
 import com.vuduc.android.worksoptimization.util.DateTimeUtils;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -30,9 +31,7 @@ import butterknife.ButterKnife;
  * on handsets.
  */
 public class ItemDetailFragment extends Fragment
-        implements ItemDetailActivity.Callbacks,
-        com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener,
-        DatePickerDialog.OnDateSetListener {
+        implements ItemDetailActivity.Callbacks {
 
     public static final String ARG_ITEM_ID = "item_id";
 
@@ -86,8 +85,16 @@ public class ItemDetailFragment extends Fragment
             @Override
             public void onClick(View v) {
                 int[] time = DateTimeUtils.millis2Time(mEstimateTime);
+
+                // TODO: Replace by 2 EditTexts (inputType: number)
                 com.wdullaer.materialdatetimepicker.time.TimePickerDialog
-                        .newInstance(ItemDetailFragment.this, time[0], time[1], true)
+                        .newInstance(new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
+                                mEstimateTime = (hourOfDay * 60l + minute) * 60 * 1000;
+                                mBtnEstimateTime.setText(String.format("%02d:%02d", hourOfDay, minute));
+                            }
+                        }, time[0], time[1], true)
                         .show(getActivity().getFragmentManager(), "TimePickerDialog");
             }
         });
@@ -97,8 +104,26 @@ public class ItemDetailFragment extends Fragment
             public void onClick(View v) {
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(new Date(mDeadline));
+
+                final int[] time = new int[] { cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE) };
+
                 DatePickerDialog.newInstance(
-                        ItemDetailFragment.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+                                mDeadline = new GregorianCalendar(year, monthOfYear, dayOfMonth).getTimeInMillis();
+                                mBtnDeadline.setText(DateTimeUtils.date2Text(mDeadline));
+
+                                com.wdullaer.materialdatetimepicker.time.TimePickerDialog
+                                        .newInstance(new TimePickerDialog.OnTimeSetListener() {
+                                            @Override
+                                            public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
+                                                mDeadline += (hourOfDay * 60 + minute) * 60 * 1000;
+                                            }
+                                        }, time[0], time[1], true)
+                                        .show(getActivity().getFragmentManager(), "TimePickerDialog");
+                            }
+                        },
                         cal.get(Calendar.YEAR),
                         cal.get(Calendar.MONTH),
                         cal.get(Calendar.DAY_OF_MONTH)
@@ -130,17 +155,5 @@ public class ItemDetailFragment extends Fragment
     public boolean onSave(View v) {
         saveData();
         return true;
-    }
-
-    @Override
-    public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
-        mEstimateTime = (hourOfDay * 60l + minute) * 60 * 1000;
-        mBtnEstimateTime.setText(String.format("%02d:%02d", hourOfDay, minute));
-    }
-
-    @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        mDeadline = new GregorianCalendar(year, monthOfYear, dayOfMonth).getTimeInMillis();
-        mBtnDeadline.setText(DateTimeUtils.date2Text(mDeadline));
     }
 }

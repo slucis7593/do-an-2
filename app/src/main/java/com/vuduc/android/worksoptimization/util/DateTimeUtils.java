@@ -14,12 +14,14 @@ public class DateTimeUtils {
     private static final String TAG = DateTimeUtils.class.getSimpleName();
 
     public static String hour2Text(long millis) {
-//        return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
-//                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-//                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-
         return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
                 TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1));
+    }
+
+    public static String fullHour2Text(long millis) {
+                return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
 
     public static String date2Text(Date date) {
@@ -27,7 +29,7 @@ public class DateTimeUtils {
     }
 
     public static String date2Text(long millis) {
-        return date2Text(millis, "dd-MM-yyyy");
+        return date2Text(millis, "dd-MM-yyyy kk:mm");
     }
 
     public static String date2Text(Date date, String formatString) {

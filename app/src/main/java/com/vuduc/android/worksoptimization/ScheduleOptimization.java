@@ -3,53 +3,74 @@ package com.vuduc.android.worksoptimization;
 import com.vuduc.android.worksoptimization.model.TaskItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by vuduc on 10/16/15.
  */
 public class ScheduleOptimization {
 
-    int i, t, cs;
-    int min;
-    int[] st;
-    int[] p;
-    int[] d;
-    int[] stt;
+    private ArrayList<TaskItem> mTaskItems;
+    public int mNumberSuccessfulItems;
+    public double mTime;
 
-    public void xep(int x) {
-        int shd = 0;
-        int time = 0;
+    public ScheduleOptimization(ArrayList<TaskItem> taskItems) {
+        mTaskItems = taskItems;
+    }
 
-        shd++;
-        st[shd] = x;
+    public ArrayList<TaskItem> run() {
+        ArrayList<TaskItem> transitionTask = new ArrayList<>();
 
-        if (time + p[x] <= d[x]) {
-            time = time + p[x];
-            return;
-        }
+        // Sort increase by deadline
+        Collections.sort(mTaskItems, new Comparator<TaskItem>() {
+            @Override
+            public int compare(TaskItem lhs, TaskItem rhs) {
+                return (int)(lhs.deadline - rhs.deadline);
+            }
+        });
 
-        min = time;
-        cs = shd;
+        boolean isContinue = true;
+        while (isContinue) {
+            mTime = 0;
+            for (int i = 0; i < mTaskItems.size(); i++) {
+                TaskItem item = mTaskItems.get(i);
 
-        for (int i = 0; i < shd - 1; i++) {
-            t = time + p[x] - p[stt[i]];
-            if (t < min && t <= d[x]) {
-                min = t;
-                cs = i;
+                if (mTime + item.estimateTime > item.getRemainingTime()) {
+                    if (transitionTask.contains(item)) {
+                        mNumberSuccessfulItems = i - 1;
+                        isContinue = false;
+                        break;
+                    } else {
+                        // Find maximum estimate item
+                        long maxEstimateTime = mTaskItems.get(0).estimateTime;
+                        int maxItemIndex = 0;
+
+                        for (int j = 1; j <= i; j++) {
+                            if (mTaskItems.get(j).estimateTime > maxEstimateTime) {
+                                maxEstimateTime = mTaskItems.get(j).estimateTime;
+                                maxItemIndex = j;
+                            }
+                        }
+
+                        // Change this item to end position and break;
+                        TaskItem moveToEndItem = mTaskItems.remove(maxItemIndex);
+                        mTaskItems.add(moveToEndItem);
+
+                        transitionTask.add(item);
+                        break;
+                    }
+                }
+
+                mTime += item.estimateTime;
+
+                if (i == mTaskItems.size() - 1) {
+                    mNumberSuccessfulItems = i;
+                    isContinue = false;
+                }
             }
         }
 
-        shd--;
-
-        for (int i = cs; i < shd; i++) {
-            stt[i] = stt[i + 1];
-            time = min;
-        }
+        return mTaskItems;
     }
-
-    public ArrayList<TaskItem> runAlgorithm(ArrayList<TaskItem> items) {
-
-        return null;
-    }
-
 }
