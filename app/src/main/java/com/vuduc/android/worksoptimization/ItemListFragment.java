@@ -1,8 +1,11 @@
 package com.vuduc.android.worksoptimization;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -13,6 +16,7 @@ import com.vuduc.android.worksoptimization.model.TaskContent;
 import com.vuduc.android.worksoptimization.model.TaskItem;
 import com.vuduc.android.worksoptimization.util.DateTimeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +37,11 @@ public class ItemListFragment extends ListFragment {
         public void onItemSelected(Long id) {
 
         }
+
+        @Override
+        public void onFinishOptimization(Integer integer) {
+
+        }
     };
 
     private Callbacks mCallbacks = sTaskCallbacks;
@@ -47,7 +56,6 @@ public class ItemListFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mTaskListAdapter = new TaskListAdapter(TaskContent.ITEMS);
         setListAdapter(mTaskListAdapter);
     }
@@ -124,8 +132,37 @@ public class ItemListFragment extends ListFragment {
         mTaskListAdapter.notifyDataSetChanged();
     }
 
+    public void onOptimization() {
+
+        ScheduleOptimization optimization = new ScheduleOptimization(TaskContent.ITEMS);
+        optimization.run();
+        TaskContent.mNumberSuccessfulItems = optimization.mNumberSuccessfulItems;
+        mTaskListAdapter.notifyDataSetChanged();
+        mCallbacks.onFinishOptimization(optimization.mNumberSuccessfulItems);
+
+        //new OptimizationTask().execute(TaskContent.ITEMS);
+    }
+
+    class OptimizationTask extends AsyncTask<ArrayList<TaskItem>, Void, Integer> {
+        @SafeVarargs
+        @Override
+        protected final Integer doInBackground(ArrayList<TaskItem>... params) {
+            ScheduleOptimization optimization = new ScheduleOptimization(params[0]);
+            optimization.run();
+            return optimization.mNumberSuccessfulItems;
+        }
+
+        @Override
+        protected void onPostExecute(Integer numberSuccessfulItems) {
+            mTaskListAdapter.notifyDataSetChanged();
+            mCallbacks.onFinishOptimization(numberSuccessfulItems);
+        }
+    }
+
     public interface Callbacks {
-        public void onItemSelected(Long id);
+        void onItemSelected(Long id);
+
+        void onFinishOptimization(Integer numberSuccessfulItems);
     }
 
     class TaskListAdapter extends ArrayAdapter<TaskItem> {
@@ -141,10 +178,22 @@ public class ItemListFragment extends ListFragment {
 
             TaskItem item = getItem(position);
 
-            ((TextView) convertView.findViewById(R.id.list_item_tv_name)).setText(item.name);
+            TextView tvName = ((TextView) convertView.findViewById(R.id.list_item_tv_name));
+            tvName.setText(item.name);
+
             ((TextView) convertView.findViewById(R.id.list_item_tv_detail)).setText(item.details);
             ((TextView) convertView.findViewById(R.id.list_item_tv_estimate_time)).setText(DateTimeUtils.hour2Text(item.estimateTime));
-            ((TextView) convertView.findViewById(R.id.list_item_tv_deadline)).setText(DateTimeUtils.date2Text(item.deadline));
+            TextView tvDeadline = ((TextView) convertView.findViewById(R.id.list_item_tv_deadline));
+            tvDeadline.setText(DateTimeUtils.date2Text(item.deadline));
+
+            if (TaskContent.mNumberSuccessfulItems > 0) {
+                if (position < TaskContent.mNumberSuccessfulItems)
+                    tvDeadline.setTextColor(Color.GREEN);
+                else
+                    tvDeadline.setTextColor(Color.RED);
+            } else {
+                tvDeadline.setTextColor(Color.BLACK);
+            }
 
             return convertView;
         }

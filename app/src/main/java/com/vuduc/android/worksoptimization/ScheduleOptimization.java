@@ -38,7 +38,7 @@ public class ScheduleOptimization {
 
                 if (mTime + item.estimateTime > item.getRemainingTime()) {
                     if (transitionTask.contains(item)) {
-                        mNumberSuccessfulItems = i - 1;
+                        mNumberSuccessfulItems = i;
                         isContinue = false;
                         break;
                     } else {
@@ -65,7 +65,7 @@ public class ScheduleOptimization {
                 mTime += item.estimateTime;
 
                 if (i == mTaskItems.size() - 1) {
-                    mNumberSuccessfulItems = i;
+                    mNumberSuccessfulItems = mTaskItems.size();
                     isContinue = false;
                 }
             }

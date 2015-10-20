@@ -14,13 +14,27 @@ public class TaskContent {
     private static final String TAG = TaskContent.class.getSimpleName();
 
     public static ArrayList<TaskItem> ITEMS = new ArrayList<TaskItem>();
-
     /**
      * A map of sample (dummy) items, by ID.
      */
     public static Map<Long, TaskItem> ITEM_MAP = new HashMap<>();
 
-    private static final int COUNT = 25;
+    public static int mNumberSuccessfulItems = 0;
+
+    // TODO: Test values
+    static {
+        long current = System.currentTimeMillis();
+
+        int[] estimateTimes = new int[] { 2, 4, 1, 2, 3, 1 };
+        int[] deadlines = new int[] { 3, 5, 6, 6, 7, 8 };
+
+//        int[] estimateTimes = new int[] { 3, 1, 5, 3, 2 };
+//        int[] deadlines = new int[] { 6, 3, 10, 7, 4 };
+
+        for (int i = 0; i < estimateTimes.length; i++) {
+            addItem(new TaskItem((long)i, "Công việc " + (i + 1), "Nội dung công việc " + (i + 1), estimateTimes[i] * 60 * 60 * 1000l, current + deadlines[i] * 60 * 60 * 1000l));
+        }
+    }
 
     public static void addItem(TaskItem item) {
         ITEMS.add(item);

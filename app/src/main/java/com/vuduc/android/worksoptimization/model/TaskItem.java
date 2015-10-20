@@ -43,6 +43,6 @@ public class TaskItem {
 
     public double getRemainingTime() {
         // TODO: return deadline - System.currentTimeMillis();
-        return deadline;
+        return deadline - System.currentTimeMillis();
     }
 }

@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
 
 import com.vuduc.android.worksoptimization.model.TaskContent;
 import com.vuduc.android.worksoptimization.model.TaskItem;
@@ -37,18 +37,20 @@ public class ItemDetailFragment extends Fragment
 
     @Bind(R.id.task_btn_deadline)
     Button mBtnDeadline;
-    @Bind(R.id.task_btn_estimate_time)
-    Button mBtnEstimateTime;
     @Bind(R.id.task_et_task_detail)
-    TextView mEtTaskDetail;
+    EditText mEtTaskDetail;
     @Bind(R.id.task_et_task_name)
-    TextView mEtTaskName;
+    EditText mEtTaskName;
+    @Bind(R.id.task_et_estimate_time_hour)
+    EditText mEtEstimateTimeHour;
+    @Bind(R.id.task_et_estimate_time_minute)
+    EditText mEtEstimateTimeMinute;
 
     private TaskItem mTaskItem;
 
     // Temporary data
-    private Long mEstimateTime;
     private Long mDeadline;
+    private long mTempDateDeadline;
 
     public ItemDetailFragment() {
 
@@ -63,7 +65,10 @@ public class ItemDetailFragment extends Fragment
 
             Activity activity = this.getActivity();
             Toolbar toolbar = (Toolbar) activity.findViewById(R.id.detail_toolbar);
-            toolbar.setTitle(mTaskItem.name);
+            if (toolbar != null) {
+                if (mTaskItem != null)
+                    toolbar.setTitle(mTaskItem.name != null ? mTaskItem.name : "");
+            }
         }
     }
 
@@ -81,24 +86,6 @@ public class ItemDetailFragment extends Fragment
     }
 
     private void initEvent() {
-        mBtnEstimateTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int[] time = DateTimeUtils.millis2Time(mEstimateTime);
-
-                // TODO: Replace by 2 EditTexts (inputType: number)
-                com.wdullaer.materialdatetimepicker.time.TimePickerDialog
-                        .newInstance(new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
-                                mEstimateTime = (hourOfDay * 60l + minute) * 60 * 1000;
-                                mBtnEstimateTime.setText(String.format("%02d:%02d", hourOfDay, minute));
-                            }
-                        }, time[0], time[1], true)
-                        .show(getActivity().getFragmentManager(), "TimePickerDialog");
-            }
-        });
-
         mBtnDeadline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,14 +98,14 @@ public class ItemDetailFragment extends Fragment
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-                                mDeadline = new GregorianCalendar(year, monthOfYear, dayOfMonth).getTimeInMillis();
-                                mBtnDeadline.setText(DateTimeUtils.date2Text(mDeadline));
+                                mTempDateDeadline = new GregorianCalendar(year, monthOfYear, dayOfMonth).getTimeInMillis();
 
                                 com.wdullaer.materialdatetimepicker.time.TimePickerDialog
                                         .newInstance(new TimePickerDialog.OnTimeSetListener() {
                                             @Override
                                             public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
-                                                mDeadline += (hourOfDay * 60 + minute) * 60 * 1000;
+                                                mDeadline = mTempDateDeadline + (hourOfDay * 60 + minute) * 60 * 1000;
+                                                mBtnDeadline.setText(DateTimeUtils.date2Text(mDeadline));
                                             }
                                         }, time[0], time[1], true)
                                         .show(getActivity().getFragmentManager(), "TimePickerDialog");
@@ -137,8 +124,11 @@ public class ItemDetailFragment extends Fragment
         if (mTaskItem != null) {
             mEtTaskName.setText(mTaskItem.name);
             mEtTaskDetail.setText(mTaskItem.details);
-            mEstimateTime = mTaskItem.estimateTime;
-            mBtnEstimateTime.setText(DateTimeUtils.hour2Text(mTaskItem.estimateTime));
+
+            int[] estimateTime = DateTimeUtils.millis2Time(mTaskItem.estimateTime);
+            mEtEstimateTimeHour.setText(String.format("%02d", estimateTime[0]));
+            mEtEstimateTimeMinute.setText(String.format("%02d", estimateTime[1]));
+
             mDeadline = mTaskItem.deadline;
             mBtnDeadline.setText(DateTimeUtils.date2Text(mTaskItem.deadline));
         }
@@ -147,7 +137,9 @@ public class ItemDetailFragment extends Fragment
     private void saveData() {
         mTaskItem.name = mEtTaskName.getText().toString();
         mTaskItem.details = mEtTaskDetail.getText().toString();
-        mTaskItem.estimateTime = mEstimateTime;
+        long hour = Long.parseLong(mEtEstimateTimeHour.getText() != null ? mEtEstimateTimeHour.getText().toString() : "0");
+        long min = Long.parseLong(mEtEstimateTimeMinute.getText() != null ? mEtEstimateTimeMinute.getText().toString() : "0");
+        mTaskItem.estimateTime = (hour * 60 + min) * 60 * 1000;
         mTaskItem.deadline = mDeadline;
     }
 
