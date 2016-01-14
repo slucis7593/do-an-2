@@ -1,6 +1,10 @@
 package com.vuduc.android.worksoptimization;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
@@ -10,8 +14,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.vuduc.android.worksoptimization.model.TaskContent;
+import com.vuduc.android.worksoptimization.model.TaskItem;
 import com.vuduc.android.worksoptimization.util.DateTimeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,43 +31,55 @@ import java.util.List;
  */
 public class ItemListFragment extends ListFragment {
 
-    /**
-     * The serialization (saved instance state) Bundle key representing the
-     * activated item position. Only used on tablets.
-     */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-    /**
-     * A dummy implementation of the {@link Callbacks} interface that does
-     * nothing. Used only when this fragment is not attached to an activity.
-     */
-    private static Callbacks sDummyCallbacks = new Callbacks() {
+
+    private static Callbacks sTaskCallbacks = new Callbacks() {
         @Override
         public void onItemSelected(Long id) {
+
+        }
+
+        @Override
+        public void onFinishOptimization(Integer integer) {
+
         }
     };
-    /**
-     * The fragment's current callback object, which is notified of list item
-     * clicks.
-     */
-    private Callbacks mCallbacks = sDummyCallbacks;
-    /**
-     * The current activated item position. Only used on tablets.
-     */
+
+    private Callbacks mCallbacks = sTaskCallbacks;
+
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
+    private TaskListAdapter mTaskListAdapter;
+    private AlertDialog mAlertDialog;
+
     public ItemListFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mTaskListAdapter = new TaskListAdapter(TaskContent.ITEMS);
+        setListAdapter(mTaskListAdapter);
 
-        // TODO: replace with a real list adapter.
-        setListAdapter(new TaskListAdapter(TaskContent.ITEMS));
+        CharSequence[] items = new CharSequence[]{"Sắp xếp tối đa số lượng công việc", "Sắp xếp tối đa giá trị công việc", "Hủy"};
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Loại sắp xếp")
+                .setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                onOptimizationByCount();
+                                break;
+                            case 1:
+                                onOptimizationByValue();
+                                break;
+                            default:
+                                mAlertDialog.dismiss();
+                                break;
+                        }
+                    }
+                }).create();
     }
 
     @Override
@@ -92,15 +110,12 @@ public class ItemListFragment extends ListFragment {
         super.onDetach();
 
         // Reset the active callbacks interface to the dummy implementation.
-        mCallbacks = sDummyCallbacks;
+        mCallbacks = sTaskCallbacks;
     }
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-
-        // Notify the active callbacks interface (the activity, if the
-        // fragment is attached to one) that an item has been selected.
         mCallbacks.onItemSelected(TaskContent.ITEMS.get(position).id);
     }
 
@@ -135,21 +150,61 @@ public class ItemListFragment extends ListFragment {
         mActivatedPosition = position;
     }
 
-    /**
-     * A callback interface that all activities containing this fragment must
-     * implement. This mechanism allows activities to be notified of item
-     * selections.
-     */
-    public interface Callbacks {
-        /**
-         * Callback for when an item has been selected.
-         */
-        public void onItemSelected(Long id);
+    public void updateUI() {
+        mTaskListAdapter.notifyDataSetChanged();
     }
 
-    class TaskListAdapter extends ArrayAdapter<TaskContent.TaskItem> {
-        public TaskListAdapter(List<TaskContent.TaskItem> tasks) {
+    public void onOptimization() {
+        mAlertDialog.show();
+    }
+
+    private void onOptimizationByValue() {
+        ScheduleOptimizationByValue optimizationByValue = new ScheduleOptimizationByValue(TaskContent.ITEMS);
+        ArrayList<TaskItem> optimizationTasks = optimizationByValue.run();
+        TaskContent.setItems(optimizationTasks);
+        updateUI();
+        mCallbacks.onFinishOptimization(optimizationByValue.mNumberSuccessfulItems);
+    }
+
+    private void onOptimizationByCount() {
+        ScheduleOptimization optimization = new ScheduleOptimization(TaskContent.ITEMS);
+        optimization.run();
+        TaskContent.mNumberSuccessfulItems = optimization.mNumberSuccessfulItems;
+        mTaskListAdapter.notifyDataSetChanged();
+        mCallbacks.onFinishOptimization(optimization.mNumberSuccessfulItems);
+
+        //new OptimizationTask().execute(TaskContent.ITEMS);
+    }
+
+    public interface Callbacks {
+        void onItemSelected(Long id);
+
+        void onFinishOptimization(Integer numberSuccessfulItems);
+    }
+
+    class OptimizationTask extends AsyncTask<ArrayList<TaskItem>, Void, Integer> {
+        @SafeVarargs
+        @Override
+        protected final Integer doInBackground(ArrayList<TaskItem>... params) {
+            ScheduleOptimization optimization = new ScheduleOptimization(params[0]);
+            optimization.run();
+            return optimization.mNumberSuccessfulItems;
+        }
+
+        @Override
+        protected void onPostExecute(Integer numberSuccessfulItems) {
+            mTaskListAdapter.notifyDataSetChanged();
+            mCallbacks.onFinishOptimization(numberSuccessfulItems);
+        }
+    }
+
+    class TaskListAdapter extends ArrayAdapter<TaskItem> {
+
+        public List<TaskItem> items;
+
+        public TaskListAdapter(List<TaskItem> tasks) {
             super(getActivity(), 0, tasks);
+            items = tasks;
         }
 
         @Override
@@ -158,12 +213,25 @@ public class ItemListFragment extends ListFragment {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_task, null);
             }
 
-            TaskContent.TaskItem item = getItem(position);
+            TaskItem item = getItem(position);
 
-            ((TextView) convertView.findViewById(R.id.list_item_tv_name)).setText(item.name);
+            TextView tvName = ((TextView) convertView.findViewById(R.id.list_item_tv_name));
+            tvName.setText(item.name);
+
             ((TextView) convertView.findViewById(R.id.list_item_tv_detail)).setText(item.details);
             ((TextView) convertView.findViewById(R.id.list_item_tv_estimate_time)).setText(DateTimeUtils.hour2Text(item.estimateTime));
-            ((TextView) convertView.findViewById(R.id.list_item_tv_deadline)).setText(DateTimeUtils.date2Text(item.deadline));
+            ((TextView) convertView.findViewById(R.id.list_item_tv_value)).setText(item.value.toString());
+            TextView tvDeadline = ((TextView) convertView.findViewById(R.id.list_item_tv_deadline));
+            tvDeadline.setText(DateTimeUtils.date2Text(item.deadline));
+
+            if (TaskContent.mNumberSuccessfulItems > 0) {
+                if (position < TaskContent.mNumberSuccessfulItems)
+                    tvDeadline.setTextColor(Color.GREEN);
+                else
+                    tvDeadline.setTextColor(Color.RED);
+            } else {
+                tvDeadline.setTextColor(Color.BLACK);
+            }
 
             return convertView;
         }
