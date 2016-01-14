@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -52,11 +53,23 @@ public class ItemListActivity extends AppCompatActivity
                 if (mDeleteFab.isActivated()) {
                     mDeleteFab.setActivated(false);
                     mDeleteFab.setImageResource(android.R.drawable.ic_delete);
-
                 } else {
                     mDeleteFab.setActivated(true);
                     mDeleteFab.setImageResource(android.R.drawable.ic_menu_delete);
+                    Snackbar.make(findViewById(android.R.id.content),
+                            "Chọn item để xóa. Nhấn lần nữa để kết thúc",
+                            Snackbar.LENGTH_LONG).show();
                 }
+            }
+        });
+
+        final Button btnChart = (Button) findViewById(R.id.task_list_btn_chart);
+        btnChart.setVisibility(View.GONE);
+        btnChart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ItemListActivity.this, ChartActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -64,6 +77,7 @@ public class ItemListActivity extends AppCompatActivity
         btnOptimization.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                btnChart.setVisibility(View.VISIBLE);
                 ((ItemListFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.item_list)).onOptimization();
             }

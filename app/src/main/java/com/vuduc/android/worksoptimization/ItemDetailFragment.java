@@ -45,6 +45,8 @@ public class ItemDetailFragment extends Fragment
     EditText mEtEstimateTimeHour;
     @Bind(R.id.task_et_estimate_time_minute)
     EditText mEtEstimateTimeMinute;
+    @Bind(R.id.task_et_estimate_task_value)
+    EditText mEtValue;
 
     private TaskItem mTaskItem;
 
@@ -124,6 +126,7 @@ public class ItemDetailFragment extends Fragment
         if (mTaskItem != null) {
             mEtTaskName.setText(mTaskItem.name);
             mEtTaskDetail.setText(mTaskItem.details);
+            mEtValue.setText(mTaskItem.value.toString());
 
             int[] estimateTime = DateTimeUtils.millis2Time(mTaskItem.estimateTime);
             mEtEstimateTimeHour.setText(String.format("%02d", estimateTime[0]));
@@ -141,6 +144,7 @@ public class ItemDetailFragment extends Fragment
         long min = Long.parseLong(mEtEstimateTimeMinute.getText() != null ? mEtEstimateTimeMinute.getText().toString() : "0");
         mTaskItem.estimateTime = (hour * 60 + min) * 60 * 1000;
         mTaskItem.deadline = mDeadline;
+        mTaskItem.value = Long.parseLong(mEtValue.getText() != null ? mEtValue.getText().toString() : "0");
     }
 
     @Override

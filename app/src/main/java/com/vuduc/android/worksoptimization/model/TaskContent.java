@@ -14,9 +14,7 @@ public class TaskContent {
     private static final String TAG = TaskContent.class.getSimpleName();
 
     public static ArrayList<TaskItem> ITEMS = new ArrayList<TaskItem>();
-    /**
-     * A map of sample (dummy) items, by ID.
-     */
+
     public static Map<Long, TaskItem> ITEM_MAP = new HashMap<>();
 
     public static int mNumberSuccessfulItems = 0;
@@ -25,6 +23,7 @@ public class TaskContent {
     static {
         long current = System.currentTimeMillis();
 
+        long[] values = new long[] { 1, 9, 1, 3, 15, 4 };
         int[] estimateTimes = new int[] { 2, 4, 1, 2, 3, 1 };
         int[] deadlines = new int[] { 3, 5, 6, 6, 7, 8 };
 
@@ -32,7 +31,16 @@ public class TaskContent {
 //        int[] deadlines = new int[] { 6, 3, 10, 7, 4 };
 
         for (int i = 0; i < estimateTimes.length; i++) {
-            addItem(new TaskItem((long)i, "Công việc " + (i + 1), "Nội dung công việc " + (i + 1), estimateTimes[i] * 60 * 60 * 1000l, current + deadlines[i] * 60 * 60 * 1000l));
+            addItem(new TaskItem((long)i, "Công việc " + (i + 1), "Nội dung công việc " + (i + 1), estimateTimes[i] * 60 * 60 * 1000l, current + deadlines[i] * 60 * 60 * 1000l, values[i]));
+        }
+    }
+
+    public static void setItems(ArrayList<TaskItem> items) {
+        ITEMS.clear();
+        ITEMS.addAll(items);
+        ITEM_MAP.clear();
+        for (TaskItem item : items) {
+            ITEM_MAP.put(item.id, item);
         }
     }
 
@@ -56,12 +64,8 @@ public class TaskContent {
         ITEM_MAP.remove(id);
     }
 
-    private static TaskItem createDummyItem(long position) {
-        return new TaskItem(position, "Item " + position, makeDetails(position), 36000000l, 1444150800000l);
+    public static void sortItems(ArrayList<TaskItem> items) {
+        ITEMS.clear();
+        ITEMS.addAll(items);
     }
-
-    private static String makeDetails(long position) {
-        return "Details about Item: " + position;
-    }
-
 }

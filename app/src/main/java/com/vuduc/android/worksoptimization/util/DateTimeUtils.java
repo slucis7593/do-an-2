@@ -1,5 +1,7 @@
 package com.vuduc.android.worksoptimization.util;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,5 +64,18 @@ public class DateTimeUtils {
         int h = (int) TimeUnit.MILLISECONDS.toHours(millis);
         int m = (int) (TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1));
         return new int[]{h, m};
+    }
+
+    public static BigDecimal millis2Hour(Long millis) {
+        int h = (int) TimeUnit.MILLISECONDS.toHours(millis);
+        int m = (int) (TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1));
+
+        return round((float)h + ((float)m) / h, 2);
+    }
+
+    public static BigDecimal round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd;
     }
 }

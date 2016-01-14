@@ -1,11 +1,12 @@
 package com.vuduc.android.worksoptimization;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -49,6 +50,7 @@ public class ItemListFragment extends ListFragment {
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
     private TaskListAdapter mTaskListAdapter;
+    private AlertDialog mAlertDialog;
 
     public ItemListFragment() {
     }
@@ -58,6 +60,26 @@ public class ItemListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         mTaskListAdapter = new TaskListAdapter(TaskContent.ITEMS);
         setListAdapter(mTaskListAdapter);
+
+        CharSequence[] items = new CharSequence[]{"Sắp xếp tối đa số lượng công việc", "Sắp xếp tối đa giá trị công việc", "Hủy"};
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Loại sắp xếp")
+                .setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                onOptimizationByCount();
+                                break;
+                            case 1:
+                                onOptimizationByValue();
+                                break;
+                            default:
+                                mAlertDialog.dismiss();
+                                break;
+                        }
+                    }
+                }).create();
     }
 
     @Override
@@ -133,7 +155,18 @@ public class ItemListFragment extends ListFragment {
     }
 
     public void onOptimization() {
+        mAlertDialog.show();
+    }
 
+    private void onOptimizationByValue() {
+        ScheduleOptimizationByValue optimizationByValue = new ScheduleOptimizationByValue(TaskContent.ITEMS);
+        ArrayList<TaskItem> optimizationTasks = optimizationByValue.run();
+        TaskContent.setItems(optimizationTasks);
+        updateUI();
+        mCallbacks.onFinishOptimization(optimizationByValue.mNumberSuccessfulItems);
+    }
+
+    private void onOptimizationByCount() {
         ScheduleOptimization optimization = new ScheduleOptimization(TaskContent.ITEMS);
         optimization.run();
         TaskContent.mNumberSuccessfulItems = optimization.mNumberSuccessfulItems;
@@ -141,6 +174,12 @@ public class ItemListFragment extends ListFragment {
         mCallbacks.onFinishOptimization(optimization.mNumberSuccessfulItems);
 
         //new OptimizationTask().execute(TaskContent.ITEMS);
+    }
+
+    public interface Callbacks {
+        void onItemSelected(Long id);
+
+        void onFinishOptimization(Integer numberSuccessfulItems);
     }
 
     class OptimizationTask extends AsyncTask<ArrayList<TaskItem>, Void, Integer> {
@@ -159,15 +198,13 @@ public class ItemListFragment extends ListFragment {
         }
     }
 
-    public interface Callbacks {
-        void onItemSelected(Long id);
-
-        void onFinishOptimization(Integer numberSuccessfulItems);
-    }
-
     class TaskListAdapter extends ArrayAdapter<TaskItem> {
+
+        public List<TaskItem> items;
+
         public TaskListAdapter(List<TaskItem> tasks) {
             super(getActivity(), 0, tasks);
+            items = tasks;
         }
 
         @Override
@@ -183,6 +220,7 @@ public class ItemListFragment extends ListFragment {
 
             ((TextView) convertView.findViewById(R.id.list_item_tv_detail)).setText(item.details);
             ((TextView) convertView.findViewById(R.id.list_item_tv_estimate_time)).setText(DateTimeUtils.hour2Text(item.estimateTime));
+            ((TextView) convertView.findViewById(R.id.list_item_tv_value)).setText(item.value.toString());
             TextView tvDeadline = ((TextView) convertView.findViewById(R.id.list_item_tv_deadline));
             tvDeadline.setText(DateTimeUtils.date2Text(item.deadline));
 

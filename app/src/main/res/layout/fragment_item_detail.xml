@@ -27,6 +27,25 @@
         android:textSize="24sp"
         android:textAllCaps="false"
         android:gravity="center"
+        android:text="@string/task_value"/>
+
+    <EditText
+        android:id="@+id/task_et_estimate_task_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@android:drawable/editbox_background_normal"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:inputType="number"
+        android:hint="00"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:textAllCaps="false"
+        android:gravity="center"
         android:text="@string/estimate_time"/>
 
     <LinearLayout
@@ -67,6 +86,15 @@
 
     </LinearLayout>
 
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:textAllCaps="false"
+        android:gravity="center"
+        android:text="@string/deadline"/>
+
     <Button
         android:id="@+id/task_btn_deadline"
         android:layout_width="match_parent"
@@ -75,6 +103,6 @@
         android:paddingLeft="46dp"
         android:paddingRight="46dp"
         android:textAllCaps="false"
-        android:text="@string/deadline"/>
+        android:text="01-01-2016"/>
 
 </LinearLayout>

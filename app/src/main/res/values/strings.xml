@@ -7,4 +7,6 @@
     <string name="deadline">Hạn chót</string>
     <string name="save">Save</string>
     <string name="optimization">Sắp xếp</string>
+    <string name="chart">Biểu đồ</string>
+    <string name="task_value">Giá trị công việc</string>
 </resources>
